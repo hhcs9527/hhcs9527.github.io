@@ -1,7 +1,7 @@
 # Hugo
-title = "My Docs"
-description = "Congrats on setting up a new Doks project!"
-images = ["cover.png"]
+title = "Po-Han, Huang"
+description = "Share the tech stuff, things I've learn."
+images = ["profile.png"]
 
 # mainSections
 mainSections = ["docs"]
@@ -51,7 +51,7 @@ mainSections = ["docs"]
   scrollSpy = true # true (default) or false
 
   # Multilingual
-  multilingualMode = false # false (default) or true
+  multilingualMode = true # false (default) or true
   showMissingLanguages = true # whether or not to show untranslated languages in the language menu; true (default) or false
 
   # Versioning
