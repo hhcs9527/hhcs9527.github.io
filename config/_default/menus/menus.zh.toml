@@ -27,7 +27,3 @@
   post = "v0.1.0"
   weight = 10
 
- [[footer]]
-   name = "隱私"
-   url = "/privacy-policy/"
-   weight = 10

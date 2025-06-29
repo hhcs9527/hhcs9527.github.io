@@ -1,1 +1,29 @@
-// Put your custom SCSS code here
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem; /* 👈 icon 間距（手機畫面） */
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    color: var(--icon-color);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .icon:hover {
+    transform: scale(1.2);
+  }
+
+  /* 📺 桌面：icon 更大 + 間距更多 */
+  @media (min-width: 768px) {
+    .social-icons {
+      gap: 1rem; /* 👈 桌機上 icon 間距變大 */
+    }
+    .icon {
+      width: 28px;
+      height: 28px;
+    }
+  }
