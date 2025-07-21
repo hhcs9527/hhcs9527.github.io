@@ -1,0 +1,27 @@
+name: Keep Codespaces Alive
+
+on:
+  schedule:
+    # every day at midnight UTC
+    - cron: '0 0 * * *'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate GH CLI
+        # GITHUB_TOKEN is provided automatically to workflows
+        run: gh auth setup-git
+
+      - name: List Codespaces
+        id: list
+        run: |
+          echo "::set-output name=names::$(gh codespace list --json name \
+            | jq -r '.[].name' | paste -sd " " -)"
+      - name: Ping each Codespace
+        run: |
+          for cs in ${{ steps.list.outputs.names }}; do
+            echo "⏳ Pinging codespace $cs…"
+            # run a harmless command inside each codespace
+            gh codespace exec -c "$cs" --echo "ping" || true
+          done
