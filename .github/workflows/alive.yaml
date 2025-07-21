@@ -1,6 +1,7 @@
 name: Keep Codespaces Alive
 
 on:
+  workflow_dispatch:
   schedule:
     # every day at midnight UTC
     - cron: '0 0 * * *'
