@@ -28,7 +28,6 @@ A loop to ensure the current state match the desired state, controller **doesn't
 - if delete, controller enforces the desired state by ensuring its complete removal from the Kubernetes environment
 
 ```yaml
-Indicate the spec section from replicas: 3 .
 apiVersion: apps/v1
 kind: Deployment
 metadata:
