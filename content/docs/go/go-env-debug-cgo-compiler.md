@@ -77,7 +77,6 @@ This provides the required C toolchain (`gcc`, `cc`, `make`, etc.).
 
 ## Summary
 
-The root cause of the build failure was a mismatch in the `CGO_ENABLED` setting and a missing C compiler. By aligning the local environment with CI (enabling CGO and installing build tools), the issue was resolved.
+- Using `go env` was the key to identifying the environment difference.
+- The root cause of the build failure was a mismatch in the `CGO_ENABLED` setting and a missing C compiler. By aligning the local environment with CI (enabling CGO and installing build tools), the issue was resolved.
 
-## Take away
-Using `go env` was the key to identifying the environment difference.
