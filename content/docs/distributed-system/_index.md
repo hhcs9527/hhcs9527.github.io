@@ -1,5 +1,5 @@
 ---
-title: Kubernetes
+title: Distributed System
 type: docs
 sidebar:
   open: false
