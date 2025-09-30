@@ -14,6 +14,6 @@ In distributed systems, network partitions are inevitable, making P a requiremen
 The real decision is between **CP and AP**: when a network partition occurs, should the system prioritize Consistency (reject requests to maintain data accuracy) or Availability (continue serving requests despite potential inconsistency)?
 
 ## Use Case
-### [KEP-3157 RV semantic](../kubernetes/KEP-3157.md#resourceversion-semantics)
+### [KEP-3157 RV semantic](/docs/kubernetes/kep-3157/#resourceversion-semantics)
 - **RV="" (CP approach)**: Performs quorum read from etcd to ensure strong consistency, but may block during network partitions.
 - **RV="0" (AP approach)**: Serves from apiserver's watch cache for immediate response and high availability, tolerating eventual consistency.
