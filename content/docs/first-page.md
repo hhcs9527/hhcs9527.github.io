@@ -5,5 +5,5 @@ prev: /
 next: docs/folder/
 ---
 
-A simple demo page.
+Welcme to my blog
 

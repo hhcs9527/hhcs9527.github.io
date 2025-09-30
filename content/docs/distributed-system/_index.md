@@ -5,8 +5,8 @@ sidebar:
   open: false
 ---
 
-# Content
+## Content
 Collection of Distributedt system knowledge sharing, and how they are used in real-world case
 
-## Table of content
+### Table of content
 - CAP theroem
