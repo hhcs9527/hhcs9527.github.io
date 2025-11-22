@@ -119,9 +119,7 @@ Pod starts
 **A**: When controller-1 loses leadership, controller-runtime shuts its manager down and stops reconciliation.
 
 ### Q4 : How does the transition happen without causing duplicate work?
-**A**: Two layers prevent duplicate work:
-
-**Idempotent reconciliation + resourceVersion**
+**A**: Idempotent reconciliation + resourceVersion
  - All writes go through the API server with `resourceVersion` checks.
  - If two leaders ever overlap briefly, one update wins and the other sees a conflict and requeues.
  - Since `Reconcile()` should be idempotent, re-running it converges to the same desired state instead of causing double side effects.
