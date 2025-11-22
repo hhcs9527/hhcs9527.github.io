@@ -9,11 +9,10 @@ When building Kubernetes controllers with high availability, you'll inevitably h
 
 - Does only the leader's reconciler execute its `Start()` method?
 - Are all reconcilers' `Reconcile()` methods blocked until leader election completes?
-- Can a leader lose its role without the pod restarting?
 - When leadership switches from controller-1 to controller-2, what happens to controller-1?
 - How does the transition happen without causing duplicate work?
 
-This article dives into the mechanism behind the scenes using cert-manager as a concrete example. Want quick answers? Jump to [Takeaway](#takeaway).
+This article dives into the mechanism behind the scenes using cert-manager as a concrete example. Want quick answers? Jump to [FAQ](#FAQ).
 
 ## Real-world story
 
@@ -39,17 +38,101 @@ Without coordination, all replicas would attempt to reconcile the same resource 
 
 Leader election solves this by ensuring **only one replica (the leader) actively runs reconciliation logic while others remain hot standbys.**
 
-## Core Architecture: Manager and Runnable Interface
+## Manager and Runnable Interface
+
 ### Manager
+
+The central orchestrator responsible for:
+
+1. **Registration**: Components register via `mgr.Add()` or builder patterns
+2. **Queueing**: Registered runnables enter a `startQueue` awaiting leader election
+3. **Execution**: After winning leadership, the Manager triggers `Start()` on all queued components
+
+### Patterns for Controller Registration
+
+#### Pattern 1: Builder-Based Registration
+
+The most common pattern for controllers watching Custom Resources:
+
+```go
+func (r *RegistryReconciler) SetupWithManager(mgr ctrl.Manager) error {
+    return ctrl.NewControllerManagedBy(mgr).
+        For(&storagev1alpha1.Resource{}).
+        Complete(r)
+}
+```
+
+**Example**: [Kubewarden's registry controller](https://github.com/kubewarden/sbomscanner/blob/main/internal/controller/registry_controller.go#L92) uses `SetupWithManager` to register the custom controller and ensure the registry exists.
+
+#### Pattern 2: Manual Registration
+
+For specialized components like cert managers that rotate certificates in a time loop, manual registration provides fine-grained control over leader election behavior:
+
+```go
+func (r *CertReconciler) SetupWithManager(mgr ctrl.Manager) error {
+    return mgr.Add(r) // Direct registration
+}
+
+func (r *CertReconciler) Start(ctx context.Context) error {
+    // Custom startup logic - runs only on leader
+    return r.controller.Start(ctx)
+}
+```
+
+**Example**: [Kubewarden's certController](https://github.com/kubewarden/kubewarden-controller/blob/57d46e64b05bdbcf1f7849e25af56037d09f273c/internal/controller/cert_controller.go#L60) uses `Start()` for certificate rotation.
 
 ### Runnable Interface
 
-## How It Works: The Complete Flow
+The Runnable interface provides a way to execute code periodically without reconciliation:
 
-[展开细节时使用]
+- Provides an interface to run custom logic independently from reconcilers
+- By implementing the `Start()` function, the registry executes it automatically
+- **LeaderElection Runnable**: A subtype of Runnable that allows you to specify whether leader election is required, preventing duplicate execution across instances
 
+## FAQ
+### Q1 : Does only the leader's reconciler execute its `Start()` method?
+**A**: Only after the leader's `Start()` method executes. The flow is:
+
+```
+Leader elected
+  → Start() begins watching CRs
+  → CR events arrive
+  → Reconcile() called for each event
+```
+Non-leader pods never call `Reconcile()` because their `Start()` never executes.
+
+Use Case: Periodically update Cert CR implemented by [Kubewarden CertController](https://github.com/kubewarden/kubewarden-controller/blob/85f71061da955ef55714a26769e06554b0a681bb/internal/controller/cert_controller.go#L34).
+
+### Q2 : Are all reconcilers' `Reconcile()` methods blocked until leader election completes?
+**A**: Yes, here is the flow
+```
+Pod starts
+  → Manager.Start() called
+  → Leader election begins (blocking)
+  → Non-leaders: Wait indefinitely
+  → Leader wins
+    → Calls Start() on all registered runnables
+    → Controller.Start() begins watching
+    → Events trigger Reconcile()
+```
+### Q3 : When leadership switches from controller-1 to controller-2, what happens to controller-1?
+**A**: When controller-1 loses leadership, controller-runtime shuts its manager down and stops reconciliation.
+
+### Q4 : How does the transition happen without causing duplicate work?
+**A**: Two layers prevent duplicate work:
+
+**Idempotent reconciliation + resourceVersion**
+ - All writes go through the API server with `resourceVersion` checks.
+ - If two leaders ever overlap briefly, one update wins and the other sees a conflict and requeues.
+ - Since `Reconcile()` should be idempotent, re-running it converges to the same desired state instead of causing double side effects.
 
 ## Takeaway
+
+- With leader election enabled, **only the leader’s manager starts leader-elected runnables**, so only the leader actually runs `Start()` and `Reconcile()`. Other replicas stay as hot standbys.
+- Start() is only called on the leader, so you can use it to implement **leader-only custom behavior**. For example, [Kubewarden CertController](https://github.com/kubewarden/kubewarden-controller/blob/85f71061da955ef55714a26769e06554b0a681bb/internal/controller/cert_controller.go#L34). uses Start() to run a periodic certificate-rotation loop.
+- **No reconciliation happens before a leader is elected** – controllers are registered with the manager but don’t start processing queues until the lease is acquired.
+- The transition to a new leader is safe because of **a single Lease object + API server `resourceVersion` checks + idempotent reconcilers**. Even if a resource is reconciled again, it converges to the same desired state instead of causing double side effects.
+
 
 ## References
 
