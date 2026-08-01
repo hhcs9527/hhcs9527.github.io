@@ -42,11 +42,11 @@ Three vCPU configurations were tested while keeping guest memory at 8 GiB:
 
 Before plotting the results, each metric was normalized to improve readability and make the different benchmark categories easier to compare.
 
-![Normalized PassMark results for the 4-vCPU configuration](/images/4cpu.png)
+![Normalized PassMark results for the 4-vCPU configuration](/images/4vCPU.png)
 
-![Normalized PassMark results for the 16-vCPU configuration](/images/16cpu.png)
+![Normalized PassMark results for the 16-vCPU configuration](/images/16vCPU.png)
 
-![Normalized PassMark results for the 24-vCPU configuration](/images/24cpu.png)
+![Normalized PassMark results for the 24-vCPU configuration](/images/24vCPU.png)
 
 Across all three configurations, enabling Hyper-V generally produced the most noticeable performance improvement, particularly in several multi-threaded workloads. Other optimizations—such as host passthrough, CPU pinning, power settings, and huge pages—provided smaller or workload-specific gains.
 
