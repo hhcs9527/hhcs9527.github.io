@@ -56,19 +56,14 @@ The experiments indicate that enabling Hyper-V enlightenments had the largest po
 
 The results also suggest that assigning more vCPUs does not automatically produce a proportional increase in every PassMark score. Additional vCPUs are most useful for multi-threaded workloads; single-threaded performance is primarily determined by the performance of an individual physical core and the amount of virtualization overhead.
 
-## Baseline Comparison
-
-The following reference is the PassMark result for the host processor:
-
-- [Intel Xeon E5-2650L v3 @ 1.80 GHz — PassMark average](https://www.cpubenchmark.net/cpu.php?cpu=Intel+Xeon+E5-2650L+v3+%40+1.80GHz&id=2588&cpuCount=2)
-
-Multi-threaded scores—such as CPU Mark, Integer, Floating Point, and Physics—are **not directly comparable** between this reference and a 4-vCPU guest. The reference score represents a 24-thread run, whereas the guest has only four vCPUs.
-
-The directly comparable metric is **Single Thread (MOps/sec)**, because it uses one core regardless of the total number of cores or vCPUs available.
-
 ## Takeaways
 
 1. Hyper-V enlightenments had the **greatest** impact on Windows VM CPU performance.
 2. CPU host passthrough provided a smaller but measurable improvement.
 3. NUMA alignment and huge pages are useful tuning options, especially for larger VMs, but their benefit was incremental in this experiment.
 4. When optimizing a Windows VM on Harvester, enabling the appropriate paravirtualized Hyper-V features should be the first priority, followed by CPU model and NUMA tuning.
+5. comparable metric is **Single Thread (MOps/sec)**, because it uses one core regardless of the total number of cores or vCPUs available.
+
+## Reference
+- [Tuning Windows VM Performance](https://github.com/harvester/harvester/wiki/Tuning-Windows-VM-Performance).
+- [Intel Xeon E5-2650L v3 @ 1.80 GHz — PassMark average](https://www.cpubenchmark.net/cpu.php?cpu=Intel+Xeon+E5-2650L+v3+%40+1.80GHz&id=2588&cpuCount=2)
